@@ -1,5 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+import ABControls from './ABControls'
+import DriftPanel from './DriftPanel'
+import LoadTester from './LoadTester'
 
 const SERVER = 'http://localhost:8080'
 const POLL_MS = 1000
@@ -20,7 +23,6 @@ export default function App() {
         const data = await res.json()
         if (!alive) return
 
-        // Compute instantaneous RPS: change in total_requests over change in time
         const now = Date.now()
         const total = data.total_requests
         let instRps = 0
@@ -35,7 +37,7 @@ export default function App() {
         setError(null)
         setRpsHistory(h => {
           const next = [...h, { t: new Date().toLocaleTimeString().split(' ')[0], rps: Number(instRps.toFixed(2)) }]
-          return next.slice(-60) // keep last 60 seconds
+          return next.slice(-60)
         })
       } catch (err) {
         if (alive) setError(err.message)
@@ -113,24 +115,22 @@ export default function App() {
         </div>
       </div>
 
-      {/* Bottom row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* A/B + Drift row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <ABControls />
+        <DriftPanel />
+      </div>
+
+      {/* Load tester + Model panel row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <LoadTester />
         <Section title="Model">
           <Row label="Threshold" value={(metrics.threshold || 0).toFixed(3)} />
           <Row label="Allow" value={allow.toLocaleString()} />
           <Row label="Block" value={block.toLocaleString()} valueColor="#ef4444" />
           <Row label="Errors" value={(metrics.errors || 0).toLocaleString()} valueColor={metrics.errors > 0 ? '#ef4444' : undefined} />
-        </Section>
-        <Section title="A/B Test">
-          {metrics.ab_active ? (
-            <>
-              <Row label="Split %" value={`${metrics.split_percent}%`} />
-              <Row label="Predictions A" value={(metrics.predictions_a || 0).toLocaleString()} />
-              <Row label="Predictions B" value={(metrics.predictions_b || 0).toLocaleString()} />
-            </>
-          ) : (
-            <div className="text-sm text-gray-500 py-2">No A/B test running</div>
-          )}
+          <Row label="Cache size" value={(metrics.cache_size || 0).toLocaleString()} />
+          <Row label="Batches run" value={(metrics.batches_run || 0).toLocaleString()} />
         </Section>
       </div>
 
