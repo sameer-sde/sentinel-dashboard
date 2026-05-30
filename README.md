@@ -1,16 +1,35 @@
-# React + Vite
+# Sentinel Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite + Tailwind v4 + Recharts dashboard for [Sentinel](https://github.com/sameer-sde/sentinel),
+a real-time fraud detection ML serving system.
 
-Currently, two official plugins are available:
+## What it shows
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Live RPS chart** — polled from `/metrics` every 1 second
+- **Stat cards** — total requests, decisions, cache hit rate, avg batch size
+- **A/B Test Controls** — load candidate, set split %, promote or abort
+- **Drift Detection** — bar chart of top |z-score| features; baseline progress
+  bar before the tracker locks
+- **Built-in Load Tester** — fires `/predict` from the browser, computes
+  p50/p95/p99 client-side
+- **Model panel** — threshold, allow/block counts, errors, cache size
 
-## React Compiler
+## Run
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The Sentinel server must be running on `:8080` first ([sentinel repo](https://github.com/sameer-sde/sentinel)).
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Open `http://localhost:5173`.
+
+## Stack
+
+- Vite 8 + React 18
+- Tailwind CSS v4 (with `@tailwindcss/postcss`)
+- Recharts for time-series + bar charts
+- Plain `fetch()` polling — no React Query, no Redux. ~400 LOC.
+
+
